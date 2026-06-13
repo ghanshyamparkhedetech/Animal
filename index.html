@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Life Cycle of Animals - Interactive Explorer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #fafaf9;
+            color: #292524;
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        
+        .stage-card {
+            transition: all 0.3s ease;
+        }
+        
+        .stage-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        .active-stage {
+            border: 2px solid #14b8a6;
+            background-color: #f0fdfa;
+        }
+    </style>
+</head>
+<body class="antialiased flex flex-col min-h-screen">
+
+    <!-- Chosen Palette: Warm Neutrals (Stone/Warm Gray) with vibrant Teal, Amber, and Orange accents for an engaging, child-friendly educational feel. -->
+    <!-- Application Structure Plan: The SPA uses a dashboard-like sectioned approach with sticky top navigation. It is divided into 'Birth Types' (to compare live birth vs eggs), 'The Hen' (a simple timeline), 'Metamorphosis' (an interactive step-by-step explorer of the 4 butterfly stages), and 'Data Explorer' (a chart visualizing the duration of the butterfly's early life stages). This structure is chosen because it breaks the linear textbook chapter into distinct, interactive learning modules, making it much easier for 4th graders to digest and explore. -->
+    <!-- Visualization & Content Choices: 
+         1. Birth Comparison: Two-column grid with text/emoji cards -> Goal: Compare -> Interaction: Read and compare visually -> Justification: Simplifies text into clear categories.
+         2. Butterfly Metamorphosis: Interactive clickable sequence -> Goal: Change/Process -> Interaction: Click stage to update details -> Justification: Reinforces the 4-step process dynamically.
+         3. Butterfly Stage Duration: Doughnut Chart (Chart.js) -> Goal: Inform/Proportions -> Interaction: Hover tooltips -> Justification: Visually demonstrates how long a butterfly spends as an egg/caterpillar/pupa before adulthood. Library: Chart.js (NO SVG/Mermaid used).
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <nav class="bg-teal-600 text-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex flex-wrap justify-between items-center">
+            <div class="text-2xl font-extrabold tracking-tight flex items-center gap-2">
+                🐾 Life Cycle Explorer
+            </div>
+            <div class="flex gap-2 sm:gap-4 mt-2 sm:mt-0 overflow-x-auto pb-1 sm:pb-0">
+                <button onclick="navTo('intro')" class="nav-btn bg-teal-700 hover:bg-teal-800 px-3 py-1 rounded text-sm font-semibold transition">Intro</button>
+                <button onclick="navTo('birth')" class="nav-btn hover:bg-teal-700 px-3 py-1 rounded text-sm font-semibold transition">Birth</button>
+                <button onclick="navTo('hen')" class="nav-btn hover:bg-teal-700 px-3 py-1 rounded text-sm font-semibold transition">Hens</button>
+                <button onclick="navTo('metamorphosis')" class="nav-btn hover:bg-teal-700 px-3 py-1 rounded text-sm font-semibold transition">Butterflies</button>
+                <button onclick="navTo('data')" class="nav-btn hover:bg-teal-700 px-3 py-1 rounded text-sm font-semibold transition">Data</button>
+                <button onclick="navTo('quiz')" class="nav-btn hover:bg-teal-700 px-3 py-1 rounded text-sm font-semibold transition">Quiz</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow container mx-auto px-4 py-8">
+
+        <section id="intro" class="mb-12 animate-fade-in block">
+            <div class="bg-amber-100 rounded-2xl p-8 text-center shadow-sm border border-amber-200">
+                <h1 class="text-4xl md:text-5xl font-extrabold text-amber-900 mb-4">How Do Animals Grow? 🌍</h1>
+                <p class="text-lg text-amber-800 max-w-3xl mx-auto">
+                    Welcome to the Interactive Life Cycle Explorer! This application is designed to help you discover the amazing journeys animals take from birth to adulthood. You will interact with different sections to learn how some animals are born live, how hens hatch their eggs, and the magical process of butterfly metamorphosis.
+                </p>
+            </div>
+        </section>
+
+        <section id="birth" class="mb-12 hidden">
+            <h2 class="text-3xl font-bold text-teal-800 border-b-4 border-teal-200 pb-2 mb-6 inline-block">Two Ways to Arrive</h2>
+            <p class="text-gray-700 mb-8 text-lg bg-white p-4 rounded shadow-sm border-l-4 border-teal-500">
+                This section explores the two main ways animals begin their lives outside the mother. Read through the columns to understand the difference between live birth and hatching from eggs. This helps us categorize animals based on their early development.
+            </p>
+            
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="bg-orange-50 rounded-xl p-6 border-2 border-orange-200 shadow-sm">
+                    <div class="text-6xl text-center mb-4">🐈🐐</div>
+                    <h3 class="text-2xl font-bold text-orange-800 text-center mb-4">Tummy Birth (Live Birth)</h3>
+                    <p class="text-gray-700 mb-4 text-center">Some babies grow inside their mother's tummy and are born looking very much like their parents right from the start.</p>
+                    <ul class="space-y-2 bg-white p-4 rounded-lg">
+                        <li class="flex items-center gap-2"><span class="text-xl">🐱</span> Kittens look like adult cats.</li>
+                        <li class="flex items-center gap-2"><span class="text-xl">🐐</span> Kids look like adult goats.</li>
+                        <li class="flex items-center gap-2"><span class="text-xl">🐶</span> Puppies look like adult dogs.</li>
+                    </ul>
+                </div>
+                
+                <div class="bg-blue-50 rounded-xl p-6 border-2 border-blue-200 shadow-sm">
+                    <div class="text-6xl text-center mb-4">🥚🐸</div>
+                    <h3 class="text-2xl font-bold text-blue-800 text-center mb-4">Laying Eggs</h3>
+                    <p class="text-gray-700 mb-4 text-center">Other animals lay eggs. Some eggs are big, but others are so incredibly tiny we can hardly see them without a microscope!</p>
+                    <ul class="space-y-2 bg-white p-4 rounded-lg">
+                        <li class="flex items-center gap-2"><span class="text-xl">🐔</span> Hens lay large, visible eggs.</li>
+                        <li class="flex items-center gap-2"><span class="text-xl">🦎</span> Lizards lay soft eggs.</li>
+                        <li class="flex items-center gap-2"><span class="text-xl">🕷️</span> Spiders and ants lay microscopic eggs.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="hen" class="mb-12 hidden">
+            <h2 class="text-3xl font-bold text-amber-600 border-b-4 border-amber-200 pb-2 mb-6 inline-block">The Journey of a Chick</h2>
+            <p class="text-gray-700 mb-8 text-lg bg-white p-4 rounded shadow-sm border-l-4 border-amber-500">
+                This section details the specific process a hen goes through to bring a chick into the world. It highlights the concept of 'hatching' and the protective nature of the mother, demonstrating that eggs require specific conditions (warmth) to develop.
+            </p>
+
+            <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
+                <div class="grid md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-gray-200">
+                    <div class="p-6 flex flex-col items-center text-center hover:bg-gray-50 transition">
+                        <div class="text-5xl mb-4">🥚🐔</div>
+                        <h4 class="text-xl font-bold mb-2">1. Laying & Hatching</h4>
+                        <p class="text-gray-600">The hen lays the egg. The chick needs warmth to grow, so the mother sits on the eggs to keep them warm. This is called <strong>hatching</strong>.</p>
+                    </div>
+                    <div class="p-6 flex flex-col items-center text-center hover:bg-gray-50 transition">
+                        <div class="text-5xl mb-4">🛡️😠</div>
+                        <h4 class="text-xl font-bold mb-2">2. Protection</h4>
+                        <p class="text-gray-600">While hatching, the mother hen becomes very aggressive. She fears for the safety of her eggs and will attack anyone who comes close!</p>
+                    </div>
+                    <div class="p-6 flex flex-col items-center text-center hover:bg-gray-50 transition">
+                        <div class="text-5xl mb-4">🐣🐥</div>
+                        <h4 class="text-xl font-bold mb-2">3. Birth</h4>
+                        <p class="text-gray-600">When the chick is fully grown, it breaks open the eggshell and comes out. The mother cares for the chicks until they grow bigger.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="metamorphosis" class="mb-12 hidden">
+            <h2 class="text-3xl font-bold text-purple-700 border-b-4 border-purple-200 pb-2 mb-6 inline-block">Metamorphosis: The Magic Change</h2>
+            <p class="text-gray-700 mb-8 text-lg bg-white p-4 rounded shadow-sm border-l-4 border-purple-500">
+                This interactive explorer allows you to discover the four distinct stages of a butterfly's life. Click on each stage button below to reveal what happens during that phase. This teaches the concept of metamorphosis—a dramatic change in an animal's physical form.
+            </p>
+
+            <div class="grid md:grid-cols-12 gap-6 bg-purple-50 p-6 rounded-2xl border-2 border-purple-100">
+                
+                <div class="md:col-span-4 flex flex-col gap-3" id="stage-buttons">
+                </div>
+
+                <div class="md:col-span-8">
+                    <div id="stage-display" class="bg-white h-full rounded-xl p-8 shadow-sm border border-purple-100 flex flex-col justify-center items-center text-center min-h-[300px] transition-all">
+                        <div class="text-8xl mb-6" id="display-icon">🦋</div>
+                        <h3 class="text-3xl font-bold text-purple-800 mb-2" id="display-title">Click a stage to begin!</h3>
+                        <div class="inline-block bg-purple-100 text-purple-800 font-bold px-4 py-1 rounded-full mb-4 text-sm" id="display-time">Time: ?</div>
+                        <p class="text-xl text-gray-700 max-w-md" id="display-desc">Select one of the four stages on the left to learn how the Plain Tiger butterfly transforms.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8 bg-yellow-50 p-6 rounded-xl border border-yellow-200">
+                <h3 class="text-xl font-bold text-yellow-800 mb-2 flex items-center gap-2">⚠️ Important Rule to Remember</h3>
+                <p class="text-gray-800">Butterflies are a beautiful part of our environment. <strong>It is wrong to catch them just for fun or to tie them up with strings.</strong> We must let them live freely among the plants.</p>
+            </div>
+        </section>
+
+        <section id="data" class="mb-12 hidden">
+            <h2 class="text-3xl font-bold text-blue-700 border-b-4 border-blue-200 pb-2 mb-6 inline-block">Data Explorer: Life Timeline</h2>
+            <p class="text-gray-700 mb-8 text-lg bg-white p-4 rounded shadow-sm border-l-4 border-blue-500">
+                This chart visualizes the quantitative data regarding the early life stages of the Plain Tiger butterfly. By examining this chart, you can quickly see the proportion of time the insect spends growing and transforming before it finally emerges as an adult butterfly.
+            </p>
+
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 flex flex-col md:flex-row gap-8 items-center">
+                <div class="w-full md:w-1/2">
+                    <div class="chart-container">
+                        <canvas id="butterflyChart"></canvas>
+                    </div>
+                </div>
+                <div class="w-full md:w-1/2">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4">Days in Transformation</h3>
+                    <p class="text-gray-600 mb-4">Before becoming an adult with four wings, the Plain Tiger butterfly spends nearly a month in its early stages:</p>
+                    <ul class="space-y-3">
+                        <li class="flex justify-between items-center bg-gray-50 p-3 rounded">
+                            <span class="font-bold flex items-center gap-2">🥚 Egg Stage:</span>
+                            <span class="text-blue-600 font-black">~7 Days</span>
+                        </li>
+                        <li class="flex justify-between items-center bg-gray-50 p-3 rounded">
+                            <span class="font-bold flex items-center gap-2">🐛 Larva (Caterpillar):</span>
+                            <span class="text-blue-600 font-black">~11 Days</span>
+                        </li>
+                        <li class="flex justify-between items-center bg-gray-50 p-3 rounded">
+                            <span class="font-bold flex items-center gap-2">🤎 Pupa (Chrysalis):</span>
+                            <span class="text-blue-600 font-black">~11 Days</span>
+                        </li>
+                    </ul>
+                    <div class="mt-6 p-4 bg-teal-50 border border-teal-200 rounded-lg">
+                        <h4 class="font-bold text-teal-800 mb-1">Did you know? (Stored Grain)</h4>
+                        <p class="text-sm text-teal-700">Insects found in stored grain at home go through these <strong>exact same four stages</strong>. They survive because the box provides the perfect amount of warmth and air!</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="quiz" class="mb-12 hidden">
+            <h2 class="text-3xl font-bold text-green-700 border-b-4 border-green-200 pb-2 mb-6 inline-block">Chapter MCQ Practice</h2>
+            <p class="text-gray-700 mb-8 text-lg bg-white p-4 rounded shadow-sm border-l-4 border-green-500">
+                Test your knowledge! Answer these 30 questions based on the Life Cycle of Animals. Choose carefully!
+            </p>
+
+            <div class="bg-white p-8 rounded-2xl shadow-md border border-gray-200 max-w-3xl mx-auto">
+                <div id="quiz-container">
+                    <div class="flex justify-between items-center mb-6">
+                        <span class="text-sm font-bold text-gray-500 uppercase tracking-wide" id="question-tracker">Question 1 of 30</span>
+                        <span class="text-sm font-bold bg-green-100 text-green-800 px-3 py-1 rounded-full" id="score-tracker">Score: 0</span>
+                    </div>
+                    
+                    <h3 class="text-2xl font-bold text-gray-800 mb-6 min-h-[4rem]" id="question-text">Loading question...</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6" id="options-container">
+                        <!-- Options injected via JS -->
+                    </div>
+
+                    <div id="feedback-container" class="hidden p-4 rounded-lg mb-6 font-bold text-lg text-center transition-all">
+                    </div>
+
+                    <div class="text-right">
+                        <button id="next-btn" onclick="nextQuestion()" class="hidden bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg transition shadow">Next Question</button>
+                    </div>
+                </div>
+
+                <div id="quiz-results" class="hidden text-center py-8">
+                    <div class="text-6xl mb-4">🏆</div>
+                    <h3 class="text-3xl font-bold text-gray-800 mb-2">Quiz Complete!</h3>
+                    <p class="text-xl text-gray-600 mb-6">You scored <span id="final-score" class="font-bold text-green-600 text-2xl">0</span> out of 30.</p>
+                    <button onclick="startQuiz()" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-8 rounded-xl transition shadow-md">Restart Quiz</button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-slate-800 text-slate-300 py-6 text-center text-sm">
+        <p>Created based on Class 4 EVS: The Life Cycle of Animals</p>
+    </footer>
+
+    <script>
+        const appState = {
+            currentSection: 'intro',
+            chartInstance: null
+        };
+
+        const quizData = [
+            { q: "Which of the following animals grows in its mother's tummy?", opts: ["Crow", "Kitten", "Spider", "Frog"], ans: 1 },
+            { q: "Which of these animals lays eggs?", opts: ["Goat", "Cat", "Lizard", "Puppy"], ans: 2 },
+            { q: "Why do we usually NOT see the eggs of ants and mosquitoes?", opts: ["They hide them in the sky", "They are too tiny to see easily", "They do not lay eggs", "They keep them in their tummy"], ans: 1 },
+            { q: "What does a mother hen do to hatch her eggs?", opts: ["She puts them in water", "She feeds them grain", "She sits on them to give warmth", "She throws them in the air"], ans: 2 },
+            { q: "What does the baby chick do when its growth is complete?", opts: ["It breaks the eggshell and comes out", "It goes to sleep inside forever", "It waits for the mother to break the shell", "It turns into a butterfly"], ans: 0 },
+            { q: "How does a mother hen behave when she is hatching her eggs?", opts: ["She becomes very playful", "She becomes aggressive to protect them", "She leaves the eggs alone", "She shares her eggs with other birds"], ans: 1 },
+            { q: "What is it called when an animal's adult form looks completely different from its baby form?", opts: ["Hatching", "Moulting", "Metamorphosis", "Growing"], ans: 2 },
+            { q: "How many main stages are there in a butterfly's life cycle?", opts: ["2", "3", "4", "5"], ans: 2 },
+            { q: "Which butterfly is given as a common example in the lesson?", opts: ["Monarch Butterfly", "Plain Tiger Butterfly", "Blue Morpho Butterfly", "Yellow Swallowtail"], ans: 1 },
+            { q: "On which plant does the Plain Tiger butterfly lay its eggs?", opts: ["Mango tree", "Rose bush", "Milkweed (Rui) plant", "Neem tree"], ans: 2 },
+            { q: "What is the larva of a butterfly called?", opts: ["Pupa", "Caterpillar", "Chrysalis", "Tadpole"], ans: 1 },
+            { q: "How many days does it take for a caterpillar to emerge from the Plain Tiger's egg?", opts: ["1 to 2 days", "6 to 8 days", "15 to 20 days", "1 month"], ans: 1 },
+            { q: "What does a caterpillar do immediately after it comes out of the egg?", opts: ["It goes to sleep", "It drinks water", "It starts flying", "It nibbles and eats the leaf"], ans: 3 },
+            { q: "What does the word 'moult' mean?", opts: ["To shed old skin to grow", "To build a nest", "To lay eggs", "To start flying"], ans: 0 },
+            { q: "Why does a caterpillar need to moult?", opts: ["Because it wants a new color", "Because its skin becomes too hot", "Because it eats fast and outgrows its skin", "Because the mother butterfly tells it to"], ans: 2 },
+            { q: "How many times does the Plain Tiger caterpillar moult?", opts: ["2 times", "4 times", "6 times", "10 times"], ans: 1 },
+            { q: "What is the next stage after the larva (caterpillar) stage?", opts: ["Egg", "Adult", "Pupa", "Kitten"], ans: 2 },
+            { q: "What is the pupa of a butterfly also known as?", opts: ["Shell", "Cocoon", "Chrysalis", "Tummy"], ans: 2 },
+            { q: "What does the caterpillar eat while it is inside the chrysalis?", opts: ["Leaves", "Nectar", "Tiny insects", "It does not eat anything"], ans: 3 },
+            { q: "How long does the Plain Tiger butterfly stay inside the chrysalis?", opts: ["1 or 2 days", "6 to 8 days", "11 to 12 days", "1 month"], ans: 2 },
+            { q: "How many wings does an adult butterfly have?", opts: ["2", "4", "6", "8"], ans: 1 },
+            { q: "How many legs does an adult butterfly have?", opts: ["2", "4", "6", "8"], ans: 2 },
+            { q: "Are all caterpillars the same color?", opts: ["Yes, they are all green", "No, they are of different colors", "Yes, they are all black", "Yes, they are all yellow"], ans: 1 },
+            { q: "Can insects grow inside a closed box of grain in our homes?", opts: ["Yes", "No", "Only if we put water inside", "Only in winter"], ans: 0 },
+            { q: "Why do we not see the eggs of the insects in our grain boxes at first?", opts: ["They are invisible magic", "They are hidden under the box", "Because of their tiny size", "Because they are exactly the color of the box"], ans: 2 },
+            { q: "What two things do insects need to grow inside a grain box?", opts: ["Water and sunlight", "Warmth and air", "Sugar and salt", "Soil and leaves"], ans: 1 },
+            { q: "The life cycle stages of grain insects are exactly the same as which animal?", opts: ["Goat", "Hen", "Butterfly", "Cat"], ans: 2 },
+            { q: "What comes out of the chrysalis when the growth is complete?", opts: ["A caterpillar", "A bigger egg", "An adult butterfly", "A baby butterfly without wings"], ans: 2 },
+            { q: "What is it completely wrong to do?", opts: ["Looking at butterflies", "Catching butterflies for fun and tying them up", "Planting milkweed plants", "Watching a caterpillar eat a leaf"], ans: 1 },
+            { q: "What does the caterpillar weave before its last moult to hang itself?", opts: ["A button of silken thread", "A nest of grass", "A house of mud", "A web like a spider"], ans: 0 }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let answerSelected = false;
+
+        const butterflyData = [
+            { 
+                id: 0,
+                title: "Stage 1: Egg", 
+                icon: "🥚", 
+                days: "6 to 8 days", 
+                desc: "A female butterfly lays her eggs on a specific plant. For example, the Plain Tiger butterfly lays its egg on a milkweed (rui) leaf.",
+                bgColor: "bg-blue-100",
+                textColor: "text-blue-800"
+            },
+            { 
+                id: 1,
+                title: "Stage 2: Larva (Caterpillar)", 
+                icon: "🐛", 
+                days: "10 to 12 days", 
+                desc: "A hungry caterpillar hatches! It eats the leaf so fast it grows out of its skin. It sheds its old skin (moults) 4 times to grow a new, looser one.",
+                bgColor: "bg-green-100",
+                textColor: "text-green-800"
+            },
+            { 
+                id: 2,
+                title: "Stage 3: Pupa (Chrysalis)", 
+                icon: "🤎", 
+                days: "11 to 12 days", 
+                desc: "The caterpillar spins a silky thread, hangs from a leaf, and forms a protective shell. It doesn't eat; huge changes happen to its body inside.",
+                bgColor: "bg-amber-100",
+                textColor: "text-amber-800"
+            },
+            { 
+                id: 3,
+                title: "Stage 4: Adult", 
+                icon: "🦋", 
+                days: "Adult Life", 
+                desc: "A fully grown butterfly emerges from the chrysalis. It now has four beautiful wings and six long legs, ready to fly!",
+                bgColor: "bg-purple-100",
+                textColor: "text-purple-800"
+            }
+        ];
+
+        function navTo(sectionId) {
+            document.querySelectorAll('main > section').forEach(sec => {
+                sec.classList.add('hidden');
+                sec.classList.remove('block');
+            });
+            
+            const target = document.getElementById(sectionId);
+            target.classList.remove('hidden');
+            target.classList.add('block');
+            target.classList.add('animate-fade-in');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-teal-800');
+                btn.classList.add('hover:bg-teal-700');
+            });
+            event.currentTarget.classList.add('bg-teal-800');
+            event.currentTarget.classList.remove('hover:bg-teal-700');
+
+            if (sectionId === 'data' && !appState.chartInstance) {
+                renderChart();
+            }
+            
+            appState.currentSection = sectionId;
+        }
+
+        function initButterflyExplorer() {
+            const btnContainer = document.getElementById('stage-buttons');
+            butterflyData.forEach(stage => {
+                const btn = document.createElement('button');
+                btn.className = `stage-card bg-white p-4 rounded-xl border border-gray-200 text-left w-full flex items-center gap-4 hover:border-purple-300`;
+                btn.onclick = () => updateButterflyDisplay(stage.id, btn);
+                btn.innerHTML = `
+                    <div class="text-3xl">${stage.icon}</div>
+                    <div class="font-bold text-gray-800">${stage.title}</div>
+                `;
+                btnContainer.appendChild(btn);
+            });
+        }
+
+        function updateButterflyDisplay(stageId, btnElement) {
+            document.querySelectorAll('.stage-card').forEach(c => c.classList.remove('active-stage'));
+            btnElement.classList.add('active-stage');
+
+            const stage = butterflyData[stageId];
+            
+            const displayObj = document.getElementById('stage-display');
+            displayObj.className = `h-full rounded-xl p-8 shadow-sm flex flex-col justify-center items-center text-center min-h-[300px] transition-all duration-300 ${stage.bgColor} border border-white`;
+            
+            document.getElementById('display-icon').innerText = stage.icon;
+            
+            const titleEl = document.getElementById('display-title');
+            titleEl.innerText = stage.title;
+            titleEl.className = `text-3xl font-bold mb-2 ${stage.textColor}`;
+            
+            document.getElementById('display-time').innerText = `Time spent: ${stage.days}`;
+            document.getElementById('display-desc').innerText = stage.desc;
+        }
+
+        function renderChart() {
+            const ctx = document.getElementById('butterflyChart').getContext('2d');
+            
+            const dataValues = [7, 11, 11]; 
+            const labels = ['Egg (7 Days)', 'Larva (11 Days)', 'Pupa (11 Days)'];
+            
+            appState.chartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: dataValues,
+                        backgroundColor: [
+                            '#bfdbfe', 
+                            '#86efac', 
+                            '#fcd34d'  
+                        ],
+                        borderColor: '#ffffff',
+                        borderWidth: 2,
+                        hoverOffset: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                font: {
+                                    family: "'Nunito', sans-serif",
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ` ${context.label.split('(')[0].trim()}: Approx ${context.raw} Days`;
+                                }
+                            },
+                            padding: 12,
+                            titleFont: { size: 14, family: "'Nunito', sans-serif" },
+                            bodyFont: { size: 14, family: "'Nunito', sans-serif" }
+                        }
+                    },
+                    cutout: '60%',
+                    animation: {
+                        animateScale: true,
+                        animateRotate: true
+                    }
+                }
+            });
+        }
+
+        window.onload = () => {
+            initButterflyExplorer();
+            startQuiz();
+        };
+
+        function startQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            document.getElementById('quiz-results').classList.add('hidden');
+            document.getElementById('quiz-container').classList.remove('hidden');
+            updateScoreTracker();
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            answerSelected = false;
+            const qData = quizData[currentQuestionIndex];
+            document.getElementById('question-tracker').innerText = `Question ${currentQuestionIndex + 1} of ${quizData.length}`;
+            document.getElementById('question-text').innerText = qData.q;
+            
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+            
+            qData.opts.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'w-full text-left p-4 rounded-xl border-2 border-gray-200 hover:border-green-400 hover:bg-green-50 font-semibold text-gray-700 transition duration-200';
+                btn.innerText = opt;
+                btn.onclick = () => selectOption(index, btn);
+                optionsContainer.appendChild(btn);
+            });
+
+            document.getElementById('feedback-container').classList.add('hidden');
+            document.getElementById('next-btn').classList.add('hidden');
+        }
+
+        function selectOption(selectedIndex, btnElement) {
+            if (answerSelected) return;
+            answerSelected = true;
+
+            const qData = quizData[currentQuestionIndex];
+            const isCorrect = selectedIndex === qData.ans;
+            const buttons = document.getElementById('options-container').children;
+
+            for (let i = 0; i < buttons.length; i++) {
+                buttons[i].classList.remove('hover:border-green-400', 'hover:bg-green-50', 'cursor-pointer');
+                buttons[i].classList.add('cursor-default', 'opacity-60');
+                if (i === qData.ans) {
+                    buttons[i].classList.remove('border-gray-200', 'opacity-60');
+                    buttons[i].classList.add('border-green-500', 'bg-green-100', 'text-green-900', 'opacity-100');
+                } else if (i === selectedIndex && !isCorrect) {
+                    buttons[i].classList.remove('border-gray-200');
+                    buttons[i].classList.add('border-red-500', 'bg-red-100', 'text-red-900', 'opacity-100');
+                }
+            }
+
+            const feedback = document.getElementById('feedback-container');
+            feedback.classList.remove('hidden', 'bg-green-100', 'text-green-800', 'bg-red-100', 'text-red-800');
+            
+            if (isCorrect) {
+                score++;
+                updateScoreTracker();
+                feedback.innerText = "✅ Correct!";
+                feedback.classList.add('bg-green-100', 'text-green-800');
+            } else {
+                feedback.innerText = "❌ Incorrect!";
+                feedback.classList.add('bg-red-100', 'text-red-800');
+            }
+
+            document.getElementById('next-btn').classList.remove('hidden');
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < quizData.length) {
+                renderQuestion();
+            } else {
+                showQuizResults();
+            }
+        }
+
+        function showQuizResults() {
+            document.getElementById('quiz-container').classList.add('hidden');
+            document.getElementById('quiz-results').classList.remove('hidden');
+            document.getElementById('final-score').innerText = score;
+        }
+
+        function updateScoreTracker() {
+            document.getElementById('score-tracker').innerText = `Score: ${score}`;
+        }
+    </script>
+</body>
+</html>
